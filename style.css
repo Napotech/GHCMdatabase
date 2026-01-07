@@ -1,3 +1,5 @@
+/* style.css - Save this as a separate file */
+
 /* ========================================
    CSS VARIABLES - Church Theme Colors
    ======================================== */
@@ -123,11 +125,15 @@ body {
     padding: var(--spacing-sm);
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.logo-svg {
+.logo-image {
     width: 100%;
     height: 100%;
+    object-fit: contain;
 }
 
 .church-name h1 {
@@ -254,6 +260,80 @@ body {
     border: 1px solid var(--gray-200);
 }
 
+.photo-upload-section {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 2px solid var(--gray-100);
+}
+
+.photo-upload-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-lg);
+}
+
+.photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.photo-preview {
+    width: 200px;
+    height: 200px;
+    border: 3px dashed var(--gray-300);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--gray-50);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.photo-preview:hover {
+    border-color: var(--primary-gold);
+    background: var(--light-cream);
+}
+
+.photo-placeholder {
+    text-align: center;
+    color: var(--gray-600);
+}
+
+.photo-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: var(--spacing-sm);
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.emergency-contact-section {
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+    border-top: 2px solid var(--gray-100);
+}
+
+.emergency-contact-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-lg);
+}
+
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -365,6 +445,12 @@ body {
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.btn-small {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
 }
 
 /* ========================================
@@ -506,7 +592,7 @@ body {
     background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .members-table {
@@ -541,6 +627,14 @@ body {
     color: var(--gray-700);
 }
 
+.member-photo-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 2px solid var(--gray-200);
+}
+
 .loading-message {
     text-align: center;
     padding: var(--spacing-2xl) !important;
@@ -565,12 +659,6 @@ body {
 .action-buttons {
     display: flex;
     gap: var(--spacing-xs);
-}
-
-.btn-small {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.85rem;
-    border-radius: var(--radius-sm);
 }
 
 /* ========================================
@@ -616,159 +704,39 @@ body {
    RESPONSIVE DESIGN - MOBILE
    ======================================== */
 @media (max-width: 768px) {
-    /* Header */
-    .church-name h1 {
-        font-size: 1.75rem;
-    }
-    
-    .logo-placeholder {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .tagline {
-        font-size: 0.9rem;
-    }
-    
-    /* Navigation */
-    .tab-btn {
-        font-size: 0.85rem;
-        padding: var(--spacing-md) var(--spacing-sm);
-    }
-    
-    .tab-text {
-        display: none;
-    }
-    
-    .tab-icon {
-        font-size: 1.5rem;
-    }
-    
-    /* Section Headers */
-    .section-header h2 {
-        font-size: 1.75rem;
-    }
-    
-    .section-header p {
-        font-size: 1rem;
-    }
-    
-    /* Forms */
-    .member-form {
-        padding: var(--spacing-lg);
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    /* Search */
-    .search-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Database */
-    .database-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .database-count {
-        text-align: center;
-    }
-    
-    /* Table - Horizontal Scroll */
-    .table-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .members-table {
-        min-width: 800px;
-    }
-    
-    .members-table th,
-    .members-table td {
-        padding: var(--spacing-sm);
-        font-size: 0.8rem;
-    }
-    
-    /* Footer */
-    .footer-content {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .footer-info {
-        text-align: center;
-    }
+    .church-name h1 { font-size: 1.75rem; }
+    .logo-placeholder { width: 60px; height: 60px; }
+    .tagline { font-size: 0.9rem; }
+    .tab-btn { font-size: 0.85rem; padding: var(--spacing-md) var(--spacing-sm); }
+    .tab-text { display: none; }
+    .tab-icon { font-size: 1.5rem; }
+    .section-header h2 { font-size: 1.75rem; }
+    .section-header p { font-size: 1rem; }
+    .member-form { padding: var(--spacing-lg); }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-actions { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+    .search-grid { grid-template-columns: 1fr; }
+    .database-actions { flex-direction: column; align-items: stretch; }
+    .database-count { text-align: center; }
+    .members-table { min-width: 800px; }
+    .members-table th, .members-table td { padding: var(--spacing-sm); font-size: 0.8rem; }
+    .footer-content { flex-direction: column; text-align: center; }
+    .footer-info { text-align: center; }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 0 var(--spacing-md);
-    }
-    
-    .church-name h1 {
-        font-size: 1.5rem;
-    }
-    
-    .section-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .btn {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.9rem;
-    }
-}
-
-/* ========================================
-   UTILITY CLASSES
-   ======================================== */
-.text-center {
-    text-align: center;
-}
-
-.mt-1 {
-    margin-top: var(--spacing-md);
-}
-
-.mb-1 {
-    margin-bottom: var(--spacing-md);
-}
-
-.hidden {
-    display: none;
+    .container { padding: 0 var(--spacing-md); }
+    .church-name h1 { font-size: 1.5rem; }
+    .section-header h2 { font-size: 1.5rem; }
+    .btn { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
 }
 
 /* ========================================
    PRINT STYLES
    ======================================== */
 @media print {
-    .header,
-    .nav-tabs,
-    .footer,
-    .btn,
-    .form-actions,
-    .database-actions {
-        display: none;
-    }
-    
-    .content-section {
-        display: block !important;
-    }
-    
-    body {
-        background: white;
-    }
+    .header, .nav-tabs, .footer, .btn, .form-actions, .database-actions { display: none; }
+    .content-section { display: block !important; }
+    body { background: white; }
 }
