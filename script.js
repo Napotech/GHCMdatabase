@@ -1,27 +1,54 @@
+// script.js - Save this as a separate file
+
 // ========================================
 // FIREBASE CONFIGURATION
 // ========================================
-// Replace these with your Firebase project credentials
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyC9Jwt7bJM_Ytf_RrReTuie647H-8CZU1w",
+    authDomain: "churchdatabase-ff327.firebaseapp.com",
+    projectId: "churchdatabase-ff327",
+    storageBucket: "churchdatabase-ff327.firebasestorage.app",
+    messagingSenderId: "676974447672",
+    appId: "1:676974447672:web:89bfa950bddd297f29eacd",
+    measurementId: "G-W6XY7XED36"
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
-// Collection name
 const MEMBERS_COLLECTION = 'members';
 
+// Global variables for photo handling
+let currentPhotoFile = null;
+let currentEditPhotoFile = null;
+
 // ========================================
-// TAB NAVIGATION
+// PHOTO PREVIEW HANDLERS
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
+    // Photo upload handlers
+    document.getElementById('memberPhoto').addEventListener('change', function(e) {
+        handlePhotoPreview(e.target.files[0], 'photoPreviewImg', 'removePhotoBtn');
+        currentPhotoFile = e.target.files[0];
+    });
+
+    document.getElementById('editMemberPhoto').addEventListener('change', function(e) {
+        handlePhotoPreview(e.target.files[0], 'editPhotoPreviewImg', 'editRemovePhotoBtn');
+        currentEditPhotoFile = e.target.files[0];
+    });
+
+    document.getElementById('removePhotoBtn').addEventListener('click', function() {
+        removePhoto('memberPhoto', 'photoPreviewImg', 'removePhotoBtn');
+        currentPhotoFile = null;
+    });
+
+    document.getElementById('editRemovePhotoBtn').addEventListener('click', function() {
+        removePhoto('editMemberPhoto', 'editPhotoPreviewImg', 'editRemovePhotoBtn');
+        currentEditPhotoFile = null;
+    });
+
     // Initialize tab navigation
     const tabButtons = document.querySelectorAll('.tab-btn');
     const contentSections = document.querySelectorAll('.content-section');
@@ -30,56 +57,80 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const targetTab = this.getAttribute('data-tab');
             
-            // Remove active class from all tabs and sections
             tabButtons.forEach(btn => btn.classList.remove('active'));
             contentSections.forEach(section => section.classList.remove('active'));
             
-            // Add active class to clicked tab and corresponding section
             this.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
             
-            // Load database when database tab is clicked
             if (targetTab === 'database') {
                 loadDatabase();
             }
         });
     });
     
-    // Initialize all event listeners
     initializeEventListeners();
-    
-    // Load database on page load
     loadDatabase();
-    
-    // Set up real-time listener for automatic updates
     setupRealtimeListener();
 });
 
+function handlePhotoPreview(file, imgId, btnId) {
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById(imgId);
+            const placeholder = img.previousElementSibling;
+            img.src = e.target.result;
+            img.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+            document.getElementById(btnId).style.display = 'inline-flex';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removePhoto(inputId, imgId, btnId) {
+    document.getElementById(inputId).value = '';
+    const img = document.getElementById(imgId);
+    const placeholder = img.previousElementSibling;
+    img.src = '';
+    img.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'block';
+    document.getElementById(btnId).style.display = 'none';
+}
+
 // ========================================
-// EVENT LISTENERS INITIALIZATION
+// EVENT LISTENERS
 // ========================================
 function initializeEventListeners() {
-    // Add Member Form
     document.getElementById('addMemberForm').addEventListener('submit', handleAddMember);
-    
-    // Search Member
     document.getElementById('searchMemberBtn').addEventListener('click', handleSearchMember);
-    
-    // Edit Member Form
     document.getElementById('editMemberForm').addEventListener('submit', handleUpdateMember);
-    
-    // Delete Member
     document.getElementById('deleteMemberBtn').addEventListener('click', handleDeleteMember);
-    
-    // Cancel Edit
     document.getElementById('cancelEditBtn').addEventListener('click', function() {
         document.getElementById('editFormContainer').style.display = 'none';
         document.getElementById('searchResults').innerHTML = '';
     });
-    
-    // Database Actions
     document.getElementById('refreshDatabaseBtn').addEventListener('click', loadDatabase);
     document.getElementById('downloadDatabaseBtn').addEventListener('click', downloadDatabase);
+}
+
+// ========================================
+// UPLOAD PHOTO TO FIREBASE STORAGE
+// ========================================
+async function uploadPhoto(file, memberId) {
+    if (!file) return null;
+    
+    try {
+        const storageRef = storage.ref();
+        const photoRef = storageRef.child(`member-photos/${memberId}-${Date.now()}.jpg`);
+        await photoRef.put(file);
+        const downloadURL = await photoRef.getDownloadURL();
+        return downloadURL;
+    } catch (error) {
+        console.error('Error uploading photo:', error);
+        return null;
+    }
 }
 
 // ========================================
@@ -87,7 +138,6 @@ function initializeEventListeners() {
 // ========================================
 async function generateMemberId() {
     try {
-        // Get all members to find the highest ID
         const snapshot = await db.collection(MEMBERS_COLLECTION)
             .orderBy('memberId', 'desc')
             .limit(1)
@@ -105,14 +155,12 @@ async function generateMemberId() {
             }
         }
         
-        // Generate new ID
         const newNumber = maxNumber + 1;
         const paddedNumber = String(newNumber).padStart(3, '0');
         return `GHCM-${paddedNumber}`;
         
     } catch (error) {
         console.error('Error generating Member ID:', error);
-        // Fallback: generate random ID
         return `GHCM-${Date.now().toString().slice(-6)}`;
     }
 }
@@ -127,56 +175,60 @@ async function handleAddMember(e) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const messageBox = document.getElementById('addMemberMessage');
     
-    // Disable submit button
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Registering...';
     
     try {
-        // Check if phone number already exists
         const phoneNumber = document.getElementById('phoneNumber').value;
         const phoneCheck = await db.collection(MEMBERS_COLLECTION)
             .where('phoneNumber', '==', phoneNumber)
             .get();
         
         if (!phoneCheck.empty) {
-            showMessage(messageBox, 'error', 
-                '✗ Error: Phone number already exists in database');
+            showMessage(messageBox, 'error', '✗ Error: Phone number already exists in database');
             return;
         }
         
-        // Generate Member ID
         const memberId = await generateMemberId();
         
-        // Prepare member data
+        let photoURL = null;
+        if (currentPhotoFile) {
+            photoURL = await uploadPhoto(currentPhotoFile, memberId);
+        }
+        
         const memberData = {
             memberId: memberId,
             fullName: document.getElementById('fullName').value,
             gender: document.getElementById('gender').value,
             dateOfBirth: document.getElementById('dateOfBirth').value,
+            maritalStatus: document.getElementById('maritalStatus').value,
+            numberOfChildren: parseInt(document.getElementById('numberOfChildren').value) || 0,
             phoneNumber: phoneNumber,
+            hometown: document.getElementById('hometown').value,
             residence: document.getElementById('residence').value,
+            closestLandmark: document.getElementById('closestLandmark').value,
             department: document.getElementById('department').value || '',
-            dateJoined: document.getElementById('dateJoined').value,
+            emergencyName: document.getElementById('emergencyName').value,
+            emergencyContact: document.getElementById('emergencyContact').value,
+            photoURL: photoURL,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             createdAt: new Date().toISOString()
         };
         
-        // Add to Firestore
         await db.collection(MEMBERS_COLLECTION).add(memberData);
         
-        showMessage(messageBox, 'success', 
-            `✓ Member registered successfully! Member ID: ${memberId}`);
+        showMessage(messageBox, 'success', `✓ Member registered successfully! Member ID: ${memberId}`);
         form.reset();
+        removePhoto('memberPhoto', 'photoPreviewImg', 'removePhotoBtn');
+        currentPhotoFile = null;
         
-        // Refresh database if on database tab
         if (document.getElementById('database').classList.contains('active')) {
             loadDatabase();
         }
         
     } catch (error) {
         console.error('Error adding member:', error);
-        showMessage(messageBox, 'error', 
-            '✗ Error: Failed to register member. ' + error.message);
+        showMessage(messageBox, 'error', '✗ Error: Failed to register member. ' + error.message);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span class="btn-icon">✓</span> Register Member';
@@ -193,7 +245,6 @@ async function handleSearchMember() {
     const resultsDiv = document.getElementById('searchResults');
     const messageBox = document.getElementById('editMemberMessage');
     
-    // Clear previous results
     resultsDiv.innerHTML = '';
     document.getElementById('editFormContainer').style.display = 'none';
     hideMessage(messageBox);
@@ -209,7 +260,6 @@ async function handleSearchMember() {
     try {
         let query = db.collection(MEMBERS_COLLECTION);
         
-        // Build query based on search criteria
         if (searchMemberId) {
             query = query.where('memberId', '==', searchMemberId.toUpperCase());
         } else if (searchPhone) {
@@ -222,7 +272,6 @@ async function handleSearchMember() {
             ...doc.data()
         }));
         
-        // Additional filtering for name search (Firestore doesn't support partial string search well)
         if (searchName && !searchMemberId && !searchPhone) {
             const allMembers = await db.collection(MEMBERS_COLLECTION).get();
             members = allMembers.docs
@@ -241,7 +290,7 @@ async function handleSearchMember() {
         } else {
             let resultsHTML = `<h4>Found ${members.length} member(s):</h4>`;
             
-            members.forEach((member, index) => {
+            members.forEach(member => {
                 resultsHTML += `
                     <div class="search-result-item" onclick='selectMemberForEdit(${JSON.stringify(member).replace(/'/g, "&#39;")})'>
                         <strong>${member.fullName}</strong> (${member.memberId})<br>
@@ -264,18 +313,33 @@ async function handleSearchMember() {
 function selectMemberForEdit(member) {
     const editFormContainer = document.getElementById('editFormContainer');
     
-    // Populate edit form
     document.getElementById('editMemberId').value = member.memberId;
-    document.getElementById('editRowIndex').value = member.id; // Firestore document ID
+    document.getElementById('editRowIndex').value = member.id;
     document.getElementById('editFullName').value = member.fullName;
     document.getElementById('editGender').value = member.gender;
     document.getElementById('editDateOfBirth').value = member.dateOfBirth;
+    document.getElementById('editMaritalStatus').value = member.maritalStatus || 'Single';
+    document.getElementById('editNumberOfChildren').value = member.numberOfChildren || 0;
     document.getElementById('editPhoneNumber').value = member.phoneNumber;
+    document.getElementById('editHometown').value = member.hometown || '';
     document.getElementById('editResidence').value = member.residence;
+    document.getElementById('editClosestLandmark').value = member.closestLandmark || '';
     document.getElementById('editDepartment').value = member.department || '';
-    document.getElementById('editDateJoined').value = member.dateJoined;
+    document.getElementById('editEmergencyName').value = member.emergencyName || '';
+    document.getElementById('editEmergencyContact').value = member.emergencyContact || '';
     
-    // Show edit form
+    if (member.photoURL) {
+        const img = document.getElementById('editPhotoPreviewImg');
+        const placeholder = img.previousElementSibling;
+        img.src = member.photoURL;
+        img.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+        document.getElementById('editRemovePhotoBtn').style.display = 'inline-flex';
+    } else {
+        removePhoto('editMemberPhoto', 'editPhotoPreviewImg', 'editRemovePhotoBtn');
+    }
+    
+    currentEditPhotoFile = null;
     editFormContainer.style.display = 'block';
     editFormContainer.scrollIntoView({ behavior: 'smooth' });
 }
@@ -295,27 +359,41 @@ async function handleUpdateMember(e) {
     
     try {
         const docId = document.getElementById('editRowIndex').value;
+        const memberId = document.getElementById('editMemberId').value;
         const phoneNumber = document.getElementById('editPhoneNumber').value;
         
-        // Check if phone number exists for another member
         const phoneCheck = await db.collection(MEMBERS_COLLECTION)
             .where('phoneNumber', '==', phoneNumber)
             .get();
         
         if (!phoneCheck.empty && phoneCheck.docs[0].id !== docId) {
-            showMessage(messageBox, 'error', 
-                '✗ Error: Phone number already exists for another member');
+            showMessage(messageBox, 'error', '✗ Error: Phone number already exists for another member');
             return;
+        }
+        
+        let photoURL = document.getElementById('editPhotoPreviewImg').src || null;
+        if (photoURL && photoURL.startsWith('data:')) {
+            photoURL = null;
+        }
+        
+        if (currentEditPhotoFile) {
+            photoURL = await uploadPhoto(currentEditPhotoFile, memberId);
         }
         
         const updatedData = {
             fullName: document.getElementById('editFullName').value,
             gender: document.getElementById('editGender').value,
             dateOfBirth: document.getElementById('editDateOfBirth').value,
+            maritalStatus: document.getElementById('editMaritalStatus').value,
+            numberOfChildren: parseInt(document.getElementById('editNumberOfChildren').value) || 0,
             phoneNumber: phoneNumber,
+            hometown: document.getElementById('editHometown').value,
             residence: document.getElementById('editResidence').value,
+            closestLandmark: document.getElementById('editClosestLandmark').value,
             department: document.getElementById('editDepartment').value || '',
-            dateJoined: document.getElementById('editDateJoined').value,
+            emergencyName: document.getElementById('editEmergencyName').value,
+            emergencyContact: document.getElementById('editEmergencyContact').value,
+            photoURL: photoURL,
             updatedAt: new Date().toISOString()
         };
         
@@ -324,13 +402,12 @@ async function handleUpdateMember(e) {
         showMessage(messageBox, 'success', '✓ Member updated successfully!');
         document.getElementById('editFormContainer').style.display = 'none';
         document.getElementById('searchResults').innerHTML = '';
+        currentEditPhotoFile = null;
         
-        // Clear search fields
         document.getElementById('searchName').value = '';
         document.getElementById('searchPhone').value = '';
         document.getElementById('searchMemberId').value = '';
         
-        // Refresh database if on database tab
         if (document.getElementById('database').classList.contains('active')) {
             loadDatabase();
         }
@@ -368,12 +445,10 @@ async function handleDeleteMember() {
         document.getElementById('editFormContainer').style.display = 'none';
         document.getElementById('searchResults').innerHTML = '';
         
-        // Clear search fields
         document.getElementById('searchName').value = '';
         document.getElementById('searchPhone').value = '';
         document.getElementById('searchMemberId').value = '';
         
-        // Refresh database if on database tab
         if (document.getElementById('database').classList.contains('active')) {
             loadDatabase();
         }
@@ -393,11 +468,10 @@ async function handleDeleteMember() {
 async function loadDatabase() {
     const tableBody = document.getElementById('membersTableBody');
     const memberCount = document.getElementById('memberCount');
-    const messageBox = document.getElementById('databaseMessage');
     
     tableBody.innerHTML = `
         <tr>
-            <td colspan="9" class="loading-message">
+            <td colspan="10" class="loading-message">
                 <div class="loader"></div>
                 Loading members...
             </td>
@@ -412,7 +486,7 @@ async function loadDatabase() {
         if (snapshot.empty) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="loading-message">
+                    <td colspan="10" class="loading-message">
                         No members registered yet. Add your first member!
                     </td>
                 </tr>
@@ -423,16 +497,21 @@ async function loadDatabase() {
             
             snapshot.forEach(doc => {
                 const member = { id: doc.id, ...doc.data() };
+                const photoHTML = member.photoURL 
+                    ? `<img src="${member.photoURL}" class="member-photo-thumb" alt="${member.fullName}">`
+                    : '📷';
+                    
                 tableHTML += `
                     <tr>
+                        <td>${photoHTML}</td>
                         <td>${member.memberId}</td>
                         <td>${member.fullName}</td>
                         <td>${member.gender}</td>
-                        <td>${member.dateOfBirth}</td>
+                        <td>${member.maritalStatus || 'N/A'}</td>
                         <td>${member.phoneNumber}</td>
+                        <td>${member.hometown || 'N/A'}</td>
                         <td>${member.residence}</td>
                         <td>${member.department || 'N/A'}</td>
-                        <td>${member.dateJoined}</td>
                         <td class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick='copyMemberInfo(${JSON.stringify(member).replace(/'/g, "&#39;")})'
                                     title="Copy member information">
@@ -454,12 +533,11 @@ async function loadDatabase() {
         console.error('Error loading members:', error);
         tableBody.innerHTML = `
             <tr>
-                <td colspan="9" class="loading-message">
+                <td colspan="10" class="loading-message">
                     Error loading members: ${error.message}
                 </td>
             </tr>
         `;
-        showMessage(messageBox, 'error', '✗ Error: Failed to load database');
     }
 }
 
@@ -467,9 +545,7 @@ async function loadDatabase() {
 // REAL-TIME UPDATES
 // ========================================
 function setupRealtimeListener() {
-    // Listen for real-time changes to the members collection
     db.collection(MEMBERS_COLLECTION).onSnapshot((snapshot) => {
-        // Only auto-refresh if we're on the database tab
         if (document.getElementById('database').classList.contains('active')) {
             console.log('Database updated in real-time');
             loadDatabase();
@@ -491,10 +567,15 @@ Member ID: ${member.memberId}
 Full Name: ${member.fullName}
 Gender: ${member.gender}
 Date of Birth: ${member.dateOfBirth}
+Marital Status: ${member.maritalStatus || 'N/A'}
+Number of Children: ${member.numberOfChildren || 0}
 Phone Number: ${member.phoneNumber}
-Residence: ${member.residence}
+Hometown: ${member.hometown || 'N/A'}
+Current Residence: ${member.residence}
+Closest Landmark: ${member.closestLandmark || 'N/A'}
 Department: ${member.department || 'N/A'}
-Date Joined Church: ${member.dateJoined}
+Emergency Contact Name: ${member.emergencyName || 'N/A'}
+Emergency Contact Number: ${member.emergencyContact || 'N/A'}
 Registered: ${member.createdAt || 'N/A'}
     `.trim();
     
@@ -510,13 +591,10 @@ Registered: ${member.createdAt || 'N/A'}
 // EDIT MEMBER FROM TABLE
 // ========================================
 function editMemberFromTable(member) {
-    // Switch to edit tab
     document.querySelector('[data-tab="edit-member"]').click();
     
-    // Populate search field with member ID
     document.getElementById('searchMemberId').value = member.memberId;
     
-    // Trigger search
     setTimeout(() => {
         document.getElementById('searchMemberBtn').click();
     }, 300);
@@ -557,15 +635,20 @@ Total Members: ${snapshot.size}
             textContent += `
 MEMBER ${index}
 ───────────────────────────────────────────────────────────────
-Member ID:         ${member.memberId}
-Full Name:         ${member.fullName}
-Gender:            ${member.gender}
-Date of Birth:     ${member.dateOfBirth}
-Phone Number:      ${member.phoneNumber}
-Residence:         ${member.residence}
-Department:        ${member.department || 'N/A'}
-Date Joined:       ${member.dateJoined}
-Registration Date: ${member.createdAt || 'N/A'}
+Member ID:              ${member.memberId}
+Full Name:              ${member.fullName}
+Gender:                 ${member.gender}
+Date of Birth:          ${member.dateOfBirth}
+Marital Status:         ${member.maritalStatus || 'N/A'}
+Number of Children:     ${member.numberOfChildren || 0}
+Phone Number:           ${member.phoneNumber}
+Hometown:               ${member.hometown || 'N/A'}
+Current Residence:      ${member.residence}
+Closest Landmark:       ${member.closestLandmark || 'N/A'}
+Department:             ${member.department || 'N/A'}
+Emergency Contact Name: ${member.emergencyName || 'N/A'}
+Emergency Contact No.:  ${member.emergencyContact || 'N/A'}
+Registration Date:      ${member.createdAt || 'N/A'}
 ═══════════════════════════════════════════════════════════════
 
 `;
@@ -575,10 +658,9 @@ Registration Date: ${member.createdAt || 'N/A'}
         textContent += `
 End of Report
 Generated by: Glorious Height Charismatic Ministry Database System
-Powered by Firebase
+Powered by Napotech & Firebase
 `;
         
-        // Create and download file
         const blob = new Blob([textContent], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -603,7 +685,6 @@ function showMessage(element, type, message) {
     element.className = `message-box show ${type}`;
     element.textContent = message;
     
-    // Auto-hide after 5 seconds
     setTimeout(() => {
         hideMessage(element);
     }, 5000);
