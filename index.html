@@ -18,19 +18,19 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-<div class="logo-section">
-    <div class="logo-placeholder">
-        <img 
-            src="assets/images/logo.png" 
-            alt="Glorious Height Charismatic Ministry Logo"
-            class="logo-image"
-        >
-    </div>
-    <div class="church-name">
-        <h1>Glorious Height<br>Charismatic Ministry</h1>
-    </div>
-</div>
-
+                <div class="logo-section">
+                    <div class="logo-placeholder">
+                        <img 
+                            src="assets/images/logo.png" 
+                            alt="Glorious Height Charismatic Ministry Logo"
+                            class="logo-image"
+                            onerror="this.style.display='none'"
+                        >
+                    </div>
+                    <div class="church-name">
+                        <h1>Glorious Height<br>Charismatic Ministry</h1>
+                    </div>
+                </div>
                 <p class="tagline">Member Registration & Database System</p>
             </div>
         </div>
@@ -106,10 +106,9 @@
 
                         <div class="form-group">
                             <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
-                            <input type="date" id="dateOfBirth" name="dateOfBirth">
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
                         </div>
 
-                        <!-- NEW: Marital Status -->
                         <div class="form-group">
                             <label for="maritalStatus">Marital Status <span class="required">*</span></label>
                             <select id="maritalStatus" name="maritalStatus" required>
@@ -119,7 +118,6 @@
                             </select>
                         </div>
 
-                        <!-- NEW: Number of Children -->
                         <div class="form-group">
                             <label for="numberOfChildren">Number of Children</label>
                             <input type="number" id="numberOfChildren" name="numberOfChildren" 
@@ -132,21 +130,18 @@
                                    placeholder="e.g., 0201234567">
                         </div>
 
-                        <!-- NEW: Hometown (separate) -->
                         <div class="form-group">
                             <label for="hometown">Hometown <span class="required">*</span></label>
                             <input type="text" id="hometown" name="hometown" required 
                                    placeholder="Enter hometown">
                         </div>
 
-                        <!-- NEW: Current Residence (separate) -->
                         <div class="form-group">
                             <label for="residence">Current Residence <span class="required">*</span></label>
                             <input type="text" id="residence" name="residence" required 
                                    placeholder="Enter current residential address">
                         </div>
 
-                        <!-- NEW: Closest Landmark -->
                         <div class="form-group">
                             <label for="closestLandmark">Closest Landmark <span class="required">*</span></label>
                             <input type="text" id="closestLandmark" name="closestLandmark" required 
@@ -157,7 +152,7 @@
                             <label for="department">Department / Ministry</label>
                             <select id="department" name="department">
                                 <option value="">Select Department</option>
-                                <option value="Choir">Music</option>
+                                <option value="Music">Music</option>
                                 <option value="Media">Media Team</option>
                                 <option value="Children">Children's Ministry</option>
                                 <option value="Evangelism">Evangelism</option>
@@ -165,11 +160,9 @@
                                 <option value="Other">Other</option>
                             </select>
                         </div>
-
-                        <!-- REMOVED: Date Joined Church as requested -->
                     </div>
 
-                    <!-- NEW: Emergency Contact Section -->
+                    <!-- Emergency Contact Section -->
                     <div class="emergency-contact-section">
                         <h3>Emergency Contact Information</h3>
                         <div class="form-grid">
@@ -318,13 +311,10 @@
                                 <label for="editDepartment">Department / Ministry</label>
                                 <select id="editDepartment" name="department">
                                     <option value="">Select Department</option>
-                                    <option value="Choir">Choir</option>
-                                    <option value="Ushering">Ushering</option>
+                                    <option value="Music">Music</option>
                                     <option value="Media">Media Team</option>
-                                    <option value="Youth">Youth Ministry</option>
                                     <option value="Children">Children's Ministry</option>
                                     <option value="Evangelism">Evangelism</option>
-                                    <option value="Welfare">Welfare</option>
                                     <option value="Protocol">Protocol</option>
                                     <option value="Other">Other</option>
                                 </select>
