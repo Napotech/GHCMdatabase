@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glorious Height Charismatic Ministry - Member Registration</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+<div class="logo-section">
+    <div class="logo-placeholder">
+        <img 
+            src="assets/images/logo.png" 
+            alt="Glorious Height Charismatic Ministry Logo"
+            class="logo-image"
+        >
+    </div>
+    <div class="church-name">
+        <h1>Glorious Height<br>Charismatic Ministry</h1>
+    </div>
+</div>
+
+                <p class="tagline">Member Registration & Database System</p>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <div class="container">
+            <button class="tab-btn active" data-tab="add-member">
+                <span class="tab-icon">➕</span>
+                <span class="tab-text">Add Member</span>
+            </button>
+            <button class="tab-btn" data-tab="edit-member">
+                <span class="tab-icon">✏️</span>
+                <span class="tab-text">Edit Member</span>
+            </button>
+            <button class="tab-btn" data-tab="database">
+                <span class="tab-icon">🗂️</span>
+                <span class="tab-text">Database</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- ADD MEMBER SECTION -->
+            <section id="add-member" class="content-section active">
+                <div class="section-header">
+                    <h2>New Member Registration</h2>
+                    <p>Register a new member into the church database</p>
+                </div>
+
+                <form id="addMemberForm" class="member-form">
+                    
+                    <!-- PHOTO UPLOAD SECTION -->
+                    <div class="photo-upload-section">
+                        <h3>Member Photo</h3>
+                        <div class="photo-container">
+                            <div class="photo-preview" id="photoPreview">
+                                <div class="photo-placeholder">
+                                    <span class="photo-icon">📷</span>
+                                    <p>Click to upload photo</p>
+                                </div>
+                                <img id="photoPreviewImg" style="display: none;">
+                            </div>
+                            <input type="file" id="memberPhoto" accept="image/*" style="display: none;">
+                            <div class="photo-buttons">
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('memberPhoto').click()">
+                                    Choose Photo
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="removePhotoBtn" style="display: none;">
+                                    Remove Photo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="fullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="fullName" name="fullName" required 
+                                   placeholder="Enter full name (Surname First name Other name)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender <span class="required">*</span></label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth">
+                        </div>
+
+                        <!-- NEW: Marital Status -->
+                        <div class="form-group">
+                            <label for="maritalStatus">Marital Status <span class="required">*</span></label>
+                            <select id="maritalStatus" name="maritalStatus" required>
+                                <option value="">Select Status</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                            </select>
+                        </div>
+
+                        <!-- NEW: Number of Children -->
+                        <div class="form-group">
+                            <label for="numberOfChildren">Number of Children</label>
+                            <input type="number" id="numberOfChildren" name="numberOfChildren" 
+                                   min="0" value="0" placeholder="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required 
+                                   placeholder="e.g., 0201234567">
+                        </div>
+
+                        <!-- NEW: Hometown (separate) -->
+                        <div class="form-group">
+                            <label for="hometown">Hometown <span class="required">*</span></label>
+                            <input type="text" id="hometown" name="hometown" required 
+                                   placeholder="Enter hometown">
+                        </div>
+
+                        <!-- NEW: Current Residence (separate) -->
+                        <div class="form-group">
+                            <label for="residence">Current Residence <span class="required">*</span></label>
+                            <input type="text" id="residence" name="residence" required 
+                                   placeholder="Enter current residential address">
+                        </div>
+
+                        <!-- NEW: Closest Landmark -->
+                        <div class="form-group">
+                            <label for="closestLandmark">Closest Landmark <span class="required">*</span></label>
+                            <input type="text" id="closestLandmark" name="closestLandmark" required 
+                                   placeholder="e.g., Near GCB Bank, Opposite City Mall">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Department / Ministry</label>
+                            <select id="department" name="department">
+                                <option value="">Select Department</option>
+                                <option value="Choir">Music</option>
+                                <option value="Media">Media Team</option>
+                                <option value="Children">Children's Ministry</option>
+                                <option value="Evangelism">Evangelism</option>
+                                <option value="Protocol">Protocol</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- REMOVED: Date Joined Church as requested -->
+                    </div>
+
+                    <!-- NEW: Emergency Contact Section -->
+                    <div class="emergency-contact-section">
+                        <h3>Emergency Contact Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="emergencyName">Emergency Contact Name <span class="required">*</span></label>
+                                <input type="text" id="emergencyName" name="emergencyName" required 
+                                       placeholder="Full name of emergency contact">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergencyContact">Emergency Contact Number <span class="required">*</span></label>
+                                <input type="tel" id="emergencyContact" name="emergencyContact" required 
+                                       placeholder="e.g., 0201234567">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">✓</span>
+                            Register Member
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <span class="btn-icon">↺</span>
+                            Clear Form
+                        </button>
+                    </div>
+                </form>
+
+                <div id="addMemberMessage" class="message-box"></div>
+            </section>
+
+            <!-- EDIT MEMBER SECTION -->
+            <section id="edit-member" class="content-section">
+                <div class="section-header">
+                    <h2>Edit Member Information</h2>
+                    <p>Search and update member details</p>
+                </div>
+
+                <div class="search-section">
+                    <h3>Search Member</h3>
+                    <div class="search-grid">
+                        <div class="form-group">
+                            <label for="searchName">Search by Name</label>
+                            <input type="text" id="searchName" placeholder="Enter member name">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchPhone">Search by Phone</label>
+                            <input type="tel" id="searchPhone" placeholder="Enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchMemberId">Search by Member ID</label>
+                            <input type="text" id="searchMemberId" placeholder="e.g., GHCM-001">
+                        </div>
+                    </div>
+                    <button id="searchMemberBtn" class="btn btn-primary">
+                        <span class="btn-icon">🔍</span>
+                        Search Member
+                    </button>
+                </div>
+
+                <div id="searchResults" class="search-results"></div>
+
+                <div id="editFormContainer" class="edit-form-container" style="display: none;">
+                    <h3>Update Member Information</h3>
+                    <form id="editMemberForm" class="member-form">
+                        <input type="hidden" id="editMemberId" name="memberId">
+                        <input type="hidden" id="editRowIndex" name="rowIndex">
+
+                        <!-- PHOTO EDIT SECTION -->
+                        <div class="photo-upload-section">
+                            <h3>Member Photo</h3>
+                            <div class="photo-container">
+                                <div class="photo-preview" id="editPhotoPreview">
+                                    <div class="photo-placeholder">
+                                        <span class="photo-icon">📷</span>
+                                        <p>Click to upload photo</p>
+                                    </div>
+                                    <img id="editPhotoPreviewImg" style="display: none;">
+                                </div>
+                                <input type="file" id="editMemberPhoto" accept="image/*" style="display: none;">
+                                <div class="photo-buttons">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editMemberPhoto').click()">
+                                        Change Photo
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="editRemovePhotoBtn" style="display: none;">
+                                        Remove Photo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="editFullName">Full Name <span class="required">*</span></label>
+                                <input type="text" id="editFullName" name="fullName" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editGender">Gender <span class="required">*</span></label>
+                                <select id="editGender" name="gender" required>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editDateOfBirth">Date of Birth <span class="required">*</span></label>
+                                <input type="date" id="editDateOfBirth" name="dateOfBirth" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editMaritalStatus">Marital Status <span class="required">*</span></label>
+                                <select id="editMaritalStatus" name="maritalStatus" required>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editNumberOfChildren">Number of Children</label>
+                                <input type="number" id="editNumberOfChildren" name="numberOfChildren" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editPhoneNumber">Phone Number <span class="required">*</span></label>
+                                <input type="tel" id="editPhoneNumber" name="phoneNumber" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editHometown">Hometown <span class="required">*</span></label>
+                                <input type="text" id="editHometown" name="hometown" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editResidence">Current Residence <span class="required">*</span></label>
+                                <input type="text" id="editResidence" name="residence" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editClosestLandmark">Closest Landmark <span class="required">*</span></label>
+                                <input type="text" id="editClosestLandmark" name="closestLandmark" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editDepartment">Department / Ministry</label>
+                                <select id="editDepartment" name="department">
+                                    <option value="">Select Department</option>
+                                    <option value="Choir">Choir</option>
+                                    <option value="Ushering">Ushering</option>
+                                    <option value="Media">Media Team</option>
+                                    <option value="Youth">Youth Ministry</option>
+                                    <option value="Children">Children's Ministry</option>
+                                    <option value="Evangelism">Evangelism</option>
+                                    <option value="Welfare">Welfare</option>
+                                    <option value="Protocol">Protocol</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact Edit -->
+                        <div class="emergency-contact-section">
+                            <h3>Emergency Contact Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="editEmergencyName">Emergency Contact Name <span class="required">*</span></label>
+                                    <input type="text" id="editEmergencyName" name="emergencyName" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="editEmergencyContact">Emergency Contact Number <span class="required">*</span></label>
+                                    <input type="tel" id="editEmergencyContact" name="emergencyContact" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-icon">💾</span>
+                                Update Member
+                            </button>
+                            <button type="button" id="deleteMemberBtn" class="btn btn-danger">
+                                <span class="btn-icon">🗑️</span>
+                                Delete Member
+                            </button>
+                            <button type="button" id="cancelEditBtn" class="btn btn-secondary">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="editMemberMessage" class="message-box"></div>
+            </section>
+
+            <!-- DATABASE SECTION -->
+            <section id="database" class="content-section">
+                <div class="section-header">
+                    <h2>Member Database</h2>
+                    <p>View and manage all registered members</p>
+                </div>
+
+                <div class="database-actions">
+                    <button id="refreshDatabaseBtn" class="btn btn-secondary">
+                        <span class="btn-icon">↻</span>
+                        Refresh Database
+                    </button>
+                    <button id="downloadDatabaseBtn" class="btn btn-primary">
+                        <span class="btn-icon">⬇</span>
+                        Download Database
+                    </button>
+                    <div class="database-count">
+                        Total Members: <span id="memberCount">0</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="membersTable" class="members-table">
+                        <thead>
+                            <tr>
+                                <th>Photo</th>
+                                <th>Member ID</th>
+                                <th>Full Name</th>
+                                <th>Gender</th>
+                                <th>Marital Status</th>
+                                <th>Phone Number</th>
+                                <th>Hometown</th>
+                                <th>Residence</th>
+                                <th>Department</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody">
+                            <tr>
+                                <td colspan="10" class="loading-message">
+                                    <div class="loader"></div>
+                                    Loading members...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="databaseMessage" class="message-box"></div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Glorious Height Charismatic Ministry</h3>
+                    <p>Member Registration & Database System</p>
+                </div>
+                <div class="footer-info">
+                    <p>&copy; 2026 Glorious Height Charismatic Ministry</p>
+                    <p>Powered by Napotech</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script-firebase.js"></script>
+</body>
+</html>
